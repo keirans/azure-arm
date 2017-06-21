@@ -1,0 +1,337 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "instancename": {
+            "defaultValue": "puppetmaster",
+            "metadata": {
+                "description": "The name of the server instance."
+            },
+            "type": "string"
+        },
+        "vnet": {
+            "defaultValue": "AustraliaSouthEastvNet",
+            "metadata": {
+                "description": "The name of vNet the instance is being provisioned into"
+            },
+            "type": "string"
+        },
+        "subnet": {
+            "defaultValue": "PublicSubnet1",
+            "metadata": {
+                "description": "The name of subnet the instance is being provisioned into"
+            },
+            "type": "string"
+        },
+        "baserg": {
+            "defaultValue": "australiasoutheast_baserg",
+            "metadata": {
+                "description": "The name of the base resource group that contains the base infra"
+            },
+            "type": "string"
+        },
+       "instancesize": {
+            "defaultValue": "Standard_DS3_v2",
+            "metadata": {
+                "description": "The size of the VM instance"
+            },
+            "type": "string"
+        },
+       "adminuser": {
+            "defaultValue": "puppetadmin",
+            "metadata": {
+                "description": "The admin user name for the instance"
+            },
+            "type": "string"
+        },
+       "adminpassword": {
+            "metadata": {
+                "description": "The admin password for the instance"
+            },
+            "type": "securestring"
+        },
+       "instanceid": {
+            "defaultValue": 0,
+            "metadata": {
+                "description": "The instance ID of the host "
+            },
+            "type": "int"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[concat( parameters('instancename'), 'NSG', parameters('instanceid'))]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "[concat('default-allow-ssh',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1000,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "access": "Allow"
+                        }
+                    },
+                   {
+                        "name": "[concat('default-allow-8140',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1001,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8140",
+                            "access": "Allow"
+                        }
+                    },
+                   {
+                        "name": "[concat('default-allow-3000',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1002,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3000",
+                            "access": "Allow"
+                        }
+                    },
+                   {
+                        "name": "[concat('default-allow-443',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1003,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "access": "Allow"
+                        }
+                    },
+                   {
+                        "name": "[concat('default-allow-4433',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1004,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "4433",
+                            "access": "Allow"
+                        }
+                    },
+                    {
+                        "name": "[concat('default-allow-61613',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1005,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "61613",
+                            "access": "Allow"
+                        }
+                    },
+                    {
+                        "name": "[concat('default-allow-8081',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1006,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8081",
+                            "access": "Allow"
+                        }
+                    },
+                   {
+                        "name": "[concat('default-allow-8042',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1007,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8042",
+                            "access": "Allow"
+                        }
+                    },
+                   {
+                        "name": "[concat('default-allow-8143',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1008,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8143",
+                            "access": "Allow"
+                        }
+                    },
+                   {
+                        "name": "[concat('default-allow-5432',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1009,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "5432",
+                            "access": "Allow"
+                        }
+                    },
+                   {
+                        "name": "[concat('default-allow-4430',parameters('instanceid'))]",
+                        "properties": {
+                            "priority": 1010,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "4430",
+                            "access": "Allow"
+                        }
+                    }
+
+                ]
+            },
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[concat( parameters('instancename') , 'PublicIP', parameters('instanceid'))]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            },
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(parameters('instancename'), 'VMNic', parameters('instanceid'))]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[concat('ipconfig', parameters('instancename'), parameters('instanceid'))]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat( subscription().id ,'/resourceGroups/',parameters('baserg') ,'/providers/Microsoft.Network/virtualNetworks/',parameters('vnet'),'/subnets/',parameters('subnet'))]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[concat(resourceGroup().id , '/providers/Microsoft.Network/publicIPAddresses/', parameters('instancename'), 'PublicIP',parameters('instanceid'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                   "id": "[concat(resourceGroup().id,'/providers/Microsoft.Network/networkSecurityGroups/' , parameters('instancename'), 'NSG', parameters('instanceid'))]"
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/',parameters('instancename'),'NSG', parameters('instanceid'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/',parameters('instancename'),'PublicIP', parameters('instanceid'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(parameters('instancename'),parameters('instanceid'))]",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "osProfile": {
+                    "adminUsername": "[parameters('adminuser')]",
+                    "computerName": "[parameters('instancename')]",
+                    "adminPassword": "[parameters('adminpassword')]"
+                },
+                "storageProfile": {
+                    "dataDisks": [
+                        {
+                            "diskSizeGB": 30,
+                            "managedDisk": {
+                                "storageAccountType": "Standard_LRS"
+                            },
+                            "lun": 0,
+                            "createOption": "Empty",
+                            "caching": "None"
+                        }
+                    ],
+                    "osDisk": {
+                        "name": "[concat(parameters('instancename'),'osdisk',parameters('instanceid'))]",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        },
+                        "createOption": "FromImage",
+                        "caching": "None"
+                    },
+                    "imageReference": {
+                        "publisher": "RedHat",
+                        "offer": "RHEL",
+                        "sku": "7.2",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[concat( resourceGroup().id , '/providers/Microsoft.Network/networkInterfaces/', parameters('instancename'),'VMNic',parameters('instanceid'))]"
+                        }
+                    ]
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('instancesize')]"
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/',parameters('instancename') ,'VMNic',parameters('instanceid'))]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('instancename'),parameters('instanceid'), '/' , 'Bootstrap')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('instancename'),parameters('instanceid'))]"
+            ],
+            "tags": {
+                "displayName": "[concat('bootstrap','/', parameters('instanceid'))]"
+            },
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+            "settings": {
+                "commandToExecute": "yum -y install wget"
+        }
+    }
+}
+    ],
+    "outputs": {}
+}
