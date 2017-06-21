@@ -1,0 +1,36 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "value": "AustraliaSouthEastvNet"
+    },
+    "vnetAddressPrefix": {
+      "value": "10.1.0.0/16"
+    },
+    "subnet1Name": {
+      "value": "PublicSubnet1"
+    },
+    "subnet1Prefix": {
+      "value": "10.1.0.0/24"
+    },
+    "subnet2Name": {
+      "value": "PrivateSubnet1"
+    },
+    "subnet2Prefix": {
+      "value": "10.1.1.0/24"
+    },
+    "subnet3Name": {
+      "value": "PublicSubnet2"
+    },
+    "subnet3Prefix": {
+      "value": "10.1.2.0/24"
+    },
+    "subnet4Name": {
+      "value": "PrivateSubnet2"
+    },
+    "subnet4Prefix": {
+      "value": "10.1.3.0/24"
+    },
+  }
+}
