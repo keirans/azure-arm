@@ -1,0 +1,237 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "instancename": {
+            "defaultValue": "puppetmaster",
+            "metadata": {
+                "description": "The name of the server instance."
+            },
+            "type": "string"
+        },
+        "vnet": {
+            "defaultValue": "AustraliaSouthEastvNet",
+            "metadata": {
+                "description": "The name of vNet the instance is being provisioned into"
+            },
+            "type": "string"
+        },
+        "subnet": {
+            "defaultValue": "PublicSubnet1",
+            "metadata": {
+                "description": "The name of subnet the instance is being provisioned into"
+            },
+            "type": "string"
+        },
+        "baserg": {
+            "defaultValue": "australiasoutheast_baserg",
+            "metadata": {
+                "description": "The name of the base resource group that contains the base infra"
+            },
+            "type": "string"
+        },
+       "instancesize": {
+            "defaultValue": "Standard_DS1_v2",
+            "metadata": {
+                "description": "The size of the VM instance"
+            },
+            "type": "string"
+        },
+       "adminuser": {
+            "defaultValue": "keiran",
+            "metadata": {
+                "description": "The admin user name for the instance"
+            },
+            "type": "string"
+        },
+       "adminpassword": {
+            "defaultValue": "M00m00m00MEOW$$",
+            "metadata": {
+                "description": "The admin password for the instance"
+            },
+            "type": "string"
+        },
+       "copies": {
+            "defaultValue": 1,
+            "metadata": {
+                "description": "The number of copies of the compile masters"
+            },
+            "type": "int"
+        }
+    },
+    "variables": {
+        "nodesecret": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/0432b1d0-5e2e-4e2a-ad73-e33d0652e3f7/resourceGroups/keyvaultsg/providers/Microsoft.KeyVault/vaults/puppetvault"
+                },
+           "secretName": "[concat('secret',copyIndex('bootstraploop'))]",
+           "type": "string"
+          }
+     }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[concat( parameters('instancename'), 'NSG', copyIndex('nsgloop'))]",
+            "apiVersion": "2015-06-15",
+            "copy":{
+                "count": "[parameters('copies')]",
+                "name": "nsgloop"
+            },
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "[concat('default-allow-ssh',copyIndex('nsgloop'))]",
+                        "properties": {
+                            "priority": 1000,
+                            "destinationAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "access": "Allow"
+                        }
+                    }
+                ]
+            },
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[concat( parameters('instancename') , 'PublicIP', copyIndex())]",
+            "apiVersion": "2015-06-15",
+            "copy":{
+                "count": "[parameters('copies')]",
+                "name": "ipaddrloop"
+            },
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            },
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(parameters('instancename'), 'VMNic', copyIndex())]",
+            "apiVersion": "2015-06-15",
+            "copy":{
+                "count": "[parameters('copies')]",
+                "name": "vmnicloop"
+            },
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[concat('ipconfig', parameters('instancename'), copyIndex('vmnicloop'))]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat( subscription().id ,'/resourceGroups/',parameters('baserg') ,'/providers/Microsoft.Network/virtualNetworks/',parameters('vnet'),'/subnets/',parameters('subnet'))]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[concat(resourceGroup().id , '/providers/Microsoft.Network/publicIPAddresses/', parameters('instancename'), 'PublicIP', copyIndex('vmnicloop'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                   "id": "[concat(resourceGroup().id,'/providers/Microsoft.Network/networkSecurityGroups/' , parameters('instancename'), 'NSG', copyIndex('vmnicloop'))]"
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/',parameters('instancename'),'NSG', copyIndex('vmnicloop'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/',parameters('instancename'),'PublicIP', copyIndex('vmnicloop'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(parameters('instancename'),copyIndex())]",
+            "apiVersion": "2016-04-30-preview",
+            "copy":{
+                "count": "[parameters('copies')]",
+                "name": "vmloop"
+            },
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "osProfile": {
+                    "adminUsername": "[parameters('adminuser')]",
+                    "computerName": "[parameters('instancename')]",
+                    "adminPassword": "[parameters('adminpassword')]"
+                },
+                "storageProfile": {
+                    "dataDisks": [
+                        {
+                            "diskSizeGB": 15,
+                            "managedDisk": {
+                                "storageAccountType": "Standard_LRS"
+                            },
+                            "lun": 0,
+                            "createOption": "Empty",
+                            "caching": "None"
+                        }
+                    ],
+                    "osDisk": {
+                        "name": "[concat(parameters('instancename'),'osdisk',copyIndex())]",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        },
+                        "createOption": "FromImage",
+                        "caching": "None"
+                    },
+                    "imageReference": {
+                        "publisher": "RedHat",
+                        "offer": "RHEL",
+                        "sku": "7.2",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[concat( resourceGroup().id , '/providers/Microsoft.Network/networkInterfaces/', parameters('instancename'),'VMNic',copyIndex('vmloop'))]"
+                        }
+                    ]
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('instancesize')]"
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/',parameters('instancename') ,'VMNic',copyIndex('vmloop'))]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('instancename'),copyIndex(), '/' , 'Bootstrap')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "copy":{
+                "count": "[parameters('copies')]",
+                "name": "bootstraploop"
+            },            
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('instancename'),copyIndex())]"
+            ],
+            "tags": {
+                "displayName": "[concat('bootstrap','/', copyIndex('bootstraploop'))]"
+            },
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+            "settings": {
+                "commandToExecute": "[concat('echo' ,' instanceID: ', copyIndex('bootstraploop') ,' : ' , variables('nodesecret') ,  ' > /root/id.txt' )]"
+        }
+    }
+}
+    ],
+    "outputs": {}
+}

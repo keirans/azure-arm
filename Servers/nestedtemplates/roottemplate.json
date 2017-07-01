@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "resources": [
+    {
+      "apiVersion": "2017-05-10",
+      "name": "[concat('linkedTemplate',copyIndex('templatecopy'))]",
+      "type": "Microsoft.Resources/deployments",
+        "copy": {
+            "name": "templatecopy",
+            "count": 3
+        },
+      "properties": {
+        "mode": "incremental",
+        "templateLink": {
+          "uri": "https://gist.githubusercontent.com/keirans/9b6159e7da6fc90b48695b6c0c05ae53/raw/0196648410e41264851bd451e36271024c43eb97/gistfile1.txt",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": { 
+            "instancename": {
+                "value": "demohost"
+            },
+            "adminpassword": {
+                "reference": {
+                    "keyVault": {
+                        "id": "/subscriptions/0432b1d0-5e2e-4e2a-ad73-e33d0652e3f7/resourceGroups/keyvaultsg/providers/Microsoft.KeyVault/vaults/puppetvault"
+                    },
+                    "secretName": "adminpassword"
+                }
+            },
+            "adminuser": {
+                "value": "keiran"
+            },
+            "instanceid": { 
+                "value" : "[copyIndex('templatecopy')]"
+            }
+        } 
+      }
+    }
+  ],
+  "outputs": {}
+}
