@@ -12,19 +12,19 @@ while getopts :p:c:a:e: opt "$@"; do
   case $opt in
     p)
       #echo "-p was triggered, Parameter: $OPTARG" >&2
-      /bin/echo "$OPTARG" > /etc/puppetlabs/puppet/ssl/privkey.pem
+      /bin/echo -e "$OPTARG" > /etc/puppetlabs/puppet/ssl/privkey.pem
       ;;
     c)
       #echo "-c was triggered, Parameter: $OPTARG" >&2
-      /bin/echo "$OPTARG" > /etc/puppetlabs/puppet/ssl/cert.pem
+      /bin/echo -e "$OPTARG" > /etc/puppetlabs/puppet/ssl/cert.pem
       ;;
     a)
       #echo "-a was triggered, Parameter: $OPTARG" >&2
-      /bin/echo "$OPTARG" > /etc/puppetlabs/puppet/ssl/ca.pem
+      /bin/echo -e "$OPTARG" > /etc/puppetlabs/puppet/ssl/ca.pem
       ;;
     e)
       #echo "-e was triggered, Parameter: $OPTARG" >&2
-      /bin/echo "$OPTARG" > /etc/puppetlabs/puppet/ssl/eyaml.pem
+      /bin/echo -e "$OPTARG" > /etc/puppetlabs/puppet/ssl/eyaml.pem
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
