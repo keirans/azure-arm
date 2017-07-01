@@ -8,8 +8,8 @@
 #
 #
 
-export RGNAME='puppetsecrets'
-export VAULTNAME='puppetsecretsvault'
+export RGNAME='keyvaultsg'
+export VAULTNAME='puppetvault'
 export COMPILEMASTERPREFIX='compilemaster'
 export FQDN='.domain.com'
 export DNSALTNAMES=''
