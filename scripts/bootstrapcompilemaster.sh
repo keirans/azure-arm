@@ -7,8 +7,12 @@ if [ $# -eq 0 ]; then
 fi
 
 export COMPILEMASTERPREFIX='compilemaster'
-export FQDN='.domain.com'
-export  COMPILEMASTERFQDNVAULT=`echo $(hostname)0${COMPILEMASTERID}${FQDN} | sed 's/\./-/g'`
+export FQDN='.example.com'
+export  COMPILEMASTERFQDNVAULT=`echo $(hostname)${FQDN} | sed 's/\./-/g'`
+
+# Put in the Puppet master IPs in the place of having DNS for now.
+echo "$(hostname -I) $(hostname)${FQDN} $(hostname)" >> /etc/hosts
+echo "10.1.0.4 puppetmaster.example.com puppetmaster" >> /etc/hosts
 
 # CWD
 cd /var/tmp/
@@ -60,13 +64,13 @@ az login --tenant ${TENANTID} --service-principal -u ${USERNAME} --password ${PA
 az keyvault secret download --name eyamlprivate --vault-name puppetvault -f /etc/puppetlabs/puppet/eyaml/private_key.pkcs7.pem
 
 # Grab the Instance specific components and put them in place
-az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-privkey --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/private_keys/compilemaster0.domain.com.pem
-az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-pubkey --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/public_keys/compilemaster0.domain.com.pem
-az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-cert --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/certs/compilemaster0.domain.com.pem
+az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-privkey --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/private_keys/$(hostname)${FQDN}.pem
+az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-pubkey --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/public_keys/$(hostname)${FQDN}.pem
+az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-cert --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/certs/$(hostname)${FQDN}.pem
 
 # Logout of the azure environment - We no login need any access
-az logout
+#az logout
 
 # Finally - Fix python again
-rm -f /bin/python
-ln -s /bin/python2 /bin/python
+#rm -f /bin/python
+#ln -s /bin/python2 /bin/python
