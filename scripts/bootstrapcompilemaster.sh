@@ -80,3 +80,9 @@ az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-cert --vault-name p
 
 # Bootstrap from the master
 curl -k https://puppetmaster.example.com:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names='puppetmaster.example.com,puppet.example.com,puppet,puppetmaster,`hostname`,`hostname`.example.com'
+
+# Do a final 3 run for good measure (Let code manager do its thing)
+/opt/puppetlabs/bin/puppet agent -tov
+/opt/puppetlabs/bin/puppet agent -tov
+/opt/puppetlabs/bin/puppet agent -tov
+
