@@ -61,12 +61,12 @@ az login --tenant ${TENANTID} --service-principal -u ${USERNAME} --password ${PA
 #
 
 # Grab the eyaml key and put it in place
-az keyvault secret download --name eyamlprivate --vault-name puppetvault -f /etc/puppetlabs/puppet/eyaml/private_key.pkcs7.pem
+az keyvault secret download --name eyamlprivate --vault-name puppetsecretsvault -f /etc/puppetlabs/puppet/eyaml/private_key.pkcs7.pem
 
 # Grab the Instance specific components and put them in place
-az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-privkey --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/private_keys/$(hostname)${FQDN}.pem
-az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-pubkey --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/public_keys/$(hostname)${FQDN}.pem
-az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-cert --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/certs/$(hostname)${FQDN}.pem
+az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-privkey --vault-name puppetsecretsvault -f /etc/puppetlabs/puppet/ssl/private_keys/$(hostname)${FQDN}.pem
+az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-pubkey --vault-name puppetsecretsvault -f /etc/puppetlabs/puppet/ssl/public_keys/$(hostname)${FQDN}.pem
+az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-cert --vault-name puppetsecretsvault -f /etc/puppetlabs/puppet/ssl/certs/$(hostname)${FQDN}.pem
 
 # Logout of the azure environment - We no login need any access
 #az logout
