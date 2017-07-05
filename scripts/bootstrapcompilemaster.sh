@@ -27,7 +27,7 @@ curl -q -O https://bootstrap.pypa.io/get-pip.py > /dev/null
 rm -f /bin/python
 ln -s /bin/python3 /bin/python
 
-mkdir -p /etc/puppetlabs/puppet/ssl/{private_keys,public_keys,certs}
+mkdir -p /etc/puppetlabs/puppet/ssl/{private_keys,public_keys,certs,ca}
 mkdir -p /etc/puppetlabs/puppet/eyaml
 
 while getopts :t:u:p:h opt "$@"; do
@@ -63,6 +63,9 @@ az login --tenant ${TENANTID} --service-principal -u ${USERNAME} --password ${PA
 # Grab the eyaml key and put it in place
 az keyvault secret download --name eyamlprivate --vault-name puppetsecretsvault -f /etc/puppetlabs/puppet/eyaml/private_key.pkcs7.pem
 
+# Grab the Puppet CA's Public cert and put it in place
+az keyvault secret download --name puppetmaster-CA-cert  --vault-name puppetsecretsvault -f /etc/puppetlabs/puppet/ssl/ca/ca_crt.pem
+
 # Grab the Instance specific components and put them in place
 az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-privkey --vault-name puppetsecretsvault -f /etc/puppetlabs/puppet/ssl/private_keys/$(hostname)${FQDN}.pem
 az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-pubkey --vault-name puppetsecretsvault -f /etc/puppetlabs/puppet/ssl/public_keys/$(hostname)${FQDN}.pem
@@ -74,3 +77,6 @@ az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-cert --vault-name p
 # Finally - Fix python again
 #rm -f /bin/python
 #ln -s /bin/python2 /bin/python
+
+# Bootstrap from the master
+curl -k https://puppetmaster.example.com:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names='puppetmaster.example.com,puppet.example.com,puppet,puppetmaster,`hostname`,`hostname`.example.com'
