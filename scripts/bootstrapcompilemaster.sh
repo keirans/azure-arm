@@ -75,8 +75,8 @@ az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-cert --vault-name p
 #az logout
 
 # Finally - Fix python again
-#rm -f /bin/python
-#ln -s /bin/python2 /bin/python
+rm -f /bin/python
+ln -s /bin/python2 /bin/python
 
 # Bootstrap from the master
 curl -k https://puppetmaster.example.com:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names='puppetmaster.example.com,puppet.example.com,puppet,puppetmaster,`hostname`,`hostname`.example.com'
