@@ -14,6 +14,10 @@ export  COMPILEMASTERFQDNVAULT=`echo $(hostname)${FQDN} | sed 's/\./-/g'`
 echo "$(hostname -I) $(hostname)${FQDN} $(hostname)" >> /etc/hosts
 echo "10.1.0.4 puppetmaster.example.com puppetmaster" >> /etc/hosts
 
+# Disable some services for the PoC
+systemctl disable firewalld
+systemctl stop firewalld
+
 # CWD
 cd /var/tmp/
 
@@ -74,16 +78,15 @@ az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-cert --vault-name p
 # Logout of the azure environment - We no login need any access
 #az logout
 
-# Finally - Fix python again
+# Fix python again
 rm -f /bin/python
 ln -s /bin/python2 /bin/python
 
 # Bootstrap from the master
 curl -k https://puppetmaster.example.com:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names='puppetmaster.example.com,puppet.example.com,puppet,puppetmaster,`hostname`,`hostname`.example.com'
 
-# Do a final 3 run for good measure (Let code manager do its thing)
-# Commented out for now, the above happens in the bg.. so this fails..
-#/opt/puppetlabs/bin/puppet agent -tov
-#/opt/puppetlabs/bin/puppet agent -tov
-#/opt/puppetlabs/bin/puppet agent -tov
+# Chown the Files in the eyaml dir
+chown -R pe-puppet:pe-puppet /etc/puppetlabs/puppet/eyaml/
+
+
 
