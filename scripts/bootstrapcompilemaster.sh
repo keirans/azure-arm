@@ -10,6 +10,11 @@ export COMPILEMASTERPREFIX='compilemaster'
 export FQDN='.domain.com'
 export  COMPILEMASTERFQDNVAULT=`echo $(hostname)0${COMPILEMASTERID}${FQDN} | sed 's/\./-/g'`
 
+# Disable some services for the PoC
+systemctl disable firewalld
+systemctl stop firewalld
+
+
 # CWD
 cd /var/tmp/
 
@@ -64,8 +69,11 @@ az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-privkey --vault-nam
 az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-pubkey --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/public_keys/compilemaster0.domain.com.pem
 az keyvault secret download --name ${COMPILEMASTERFQDNVAULT}-cert --vault-name puppetvault -f /etc/puppetlabs/puppet/ssl/certs/compilemaster0.domain.com.pem
 
-# Logout of the azure environment - We no login need any access
+# Logout of the azure environment - We no longer need any access
 az logout
+
+# Chown the Files in the eyaml dir
+chown -R pe-puppet:pe-puppet /etc/puppetlabs/puppet/eyaml/
 
 # Finally - Fix python again
 rm -f /bin/python
