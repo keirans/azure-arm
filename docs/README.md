@@ -2,7 +2,7 @@
 
 This is still in progress and will be covered in my Puppetconf 2017 talk in detail. Stay tuned for more updates.
 
-This set of templates and code helps you understand how Puppet Compile masters can be deployed in Azure in a stateless fashion allowing them to be managed as cattle, rather than pets. 
+This set of templates and code helps you understand how Puppet Compile masters can be deployed in Azure in a stateless fashion allowing them to be managed as cattle, rather than pets which is often the case.
 
 This approach includes full support for compilemasters that use additional Puppetserver capabilities and gems such as hiera-eyaml.
 
@@ -81,3 +81,8 @@ The Result
 
 ![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Compile_Masters_Online.png)
 
+
+* Adding Compilemaster capacity is as simple as incrementing the number of compilemaster copies we want in the ARM template and deploying the template. The automation handles the rest. In this example we just doubled our compilemasters in just a few minutes.
+
+
+![Additional Capacity](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Additional_compilemaster_capacity.png)
