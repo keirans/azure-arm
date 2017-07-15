@@ -66,9 +66,18 @@ Compile Master Deployment process
 
 The Result
 
+* Before the deployment - A single Master of Masters - Puppetmaster.example.com
+
+![Single Puppetmaster](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Single_Master.png)
 
 
-Image 2
 
-Image 3
+* After the Deployment we have 2 new Puppetmasters that have run and reported change. They arent showing up via the service API however.
+
+![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Compile_Masters_Bootstrap.png)
+
+* The Puppetmaster checks in and configures the environment with the new ready compilemasters. The Status API reports they are all online and functioning.
+
+
+![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Compile_Masters_Online.png)
 
