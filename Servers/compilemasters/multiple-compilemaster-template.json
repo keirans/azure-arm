@@ -9,7 +9,7 @@
       "type": "Microsoft.Resources/deployments",
         "copy": {
             "name": "templatecopy",
-            "count": 1 
+            "count": 2 
         },
       "properties": {
         "mode": "incremental",

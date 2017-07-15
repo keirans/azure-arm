@@ -13,7 +13,7 @@ export VAULTNAME='puppetvault'
 export COMPILEMASTERPREFIX='compilemaster'
 export FQDN='.domain.com'
 export DNSALTNAMES=''
-export COMPILEMASTERCOUNT='3'
+export COMPILEMASTERCOUNT='40'
 export AZUREREGION='australiasoutheast'
 export EYAMLPRIVATEKEYPATH=''
 

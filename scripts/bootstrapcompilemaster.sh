@@ -108,10 +108,10 @@ chmod 755 /var/tmp/install.bash
 # on the eyaml files are correct.
 #
 COUNT=0
-while [ $COUNT -ne 6 ]
+while [ $COUNT -ne 10 ]
 do
   if [ -f /opt/puppetlabs/puppet/cache/state/agent_catalog_run.lock ]; then
-    echo "It appears that Puppet is currently running. Sleeping for a minute before trying to run again ($COUNT / 6)"
+    echo "It appears that Puppet is currently running. Sleeping for a minute before trying to run again ($COUNT / 10)"
     sleep 60
     COUNT=$(( $COUNT + 1 ))
 
@@ -123,3 +123,6 @@ do
     exit 0
   fi
 done
+
+echo "Waited for 10 minutes for Puppet bootstrap to complete its initial runs - Failing build - Please investigate the logs"
+exit 1
