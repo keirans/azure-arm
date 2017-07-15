@@ -101,12 +101,14 @@ echo "=> Installing Puppet from the Master of Masters - We already have all the 
 curl -k https://puppetmaster.example.com:8140/packages/current/install.bash -o /var/tmp/install.bash
 chmod 755 /var/tmp/install.bash
 /var/tmp/install.bash  main:dns_alt_names='puppetmaster.example.com,puppet.example.com,puppet,puppetmaster,`hostname`,`hostname`.example.com'
+echo "=> Completed execution of Puppet Installation commands from the Master of Masters"
 
 #
 # Lets wait for up to 6 minutes for the initial Puppet run to complete before running Puppet
 # manually 2 more times to ensure everything is online, green in the console and the permissions
 # on the eyaml files are correct.
 #
+echo "=> Entering a wait period of up to 10 minutes for the deployment to become ready"
 COUNT=0
 while [ $COUNT -ne 10 ]
 do
