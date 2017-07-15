@@ -83,17 +83,17 @@ rm -f /bin/python
 ln -s /bin/python2 /bin/python
 
 # Bootstrap from the master - Note this goes into the background.
-curl -k https://puppetmaster.example.com:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names='puppetmaster.example.com,puppet.example.com,puppet,puppetmaster,`hostname`,`hostname`.example.com'
+#curl -k https://puppetmaster.example.com:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names='puppetmaster.example.com,puppet.example.com,puppet,puppetmaster,`hostname`,`hostname`.example.com'
 
 # Chown the Files in the eyaml dir as soon as the user account is available
 # This loop should have a timeout, to be added.
-while true
-do
-  getent passwd pe-puppet > /dev/null
-    if [ $? -eq 0 ]; then
-      chown -R pe-puppet:pe-puppet /etc/puppetlabs/puppet/eyaml/
-      exit 0
-  else
-    sleep 30
-  fi
-done
+#while true
+#do
+#  getent passwd pe-puppet > /dev/null
+#    if [ $? -eq 0 ]; then
+#      chown -R pe-puppet:pe-puppet /etc/puppetlabs/puppet/eyaml/
+#      exit 0
+#  else
+#    sleep 30
+#  fi
+#done
