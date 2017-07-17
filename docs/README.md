@@ -6,11 +6,11 @@
 
 ---
 
-What is all this ?
+### What is all this ?
 
 This document and associated code examples demonstrates how Puppet Enterprise, when deployed in Microsoft Azure, can benefit from a number of different services and capabilities, enabling more effective deployment and ongoing management, specifically in the compile master space.
 
-Compile Masters ? 
+### Compile Masters ? 
 
 
 To quote the [Puppet documentation about scaling Puppet Enterprise by adding Compile masters](https://docs.puppet.com/pe/latest/install_multimaster.html);
@@ -35,12 +35,12 @@ This topology works well, however there are some challenges with building and ma
 * Puppet Enterprise Patching and OS upgrades of compile masters can often be arduous, we want to get to a position in which these nodes can be easily disposed of, and then redeployed in an updated state. No more SSH + YUM + Puppet upgrade scripts.
 
 
-_So, TL;DR ?_
+### _So, TL;DR ?_
 
 _We want to make our compile masters be as disposable as possible, reducing the overhead of their management, while improving reliability, scalability and security_
 
 
-_So how are we going to do this ?_
+### _So how are we going to do this ?_
 
 ![Puppet Azure Architecture](https://github.com/keirans/azure-arm/blob/master/docs/img/azure_compilemaster_components.png?raw=true)
 
@@ -77,7 +77,7 @@ As each compile master instance is named compilemasterX, where X is a unique ins
 
 
 
-_Puppet Master Configuration Steps_
+### _Puppet Master Configuration Steps_
 1. Pregenerate all the compile masters keys and certs
 2. Ensure you have a eyaml key created
 3. Create a suitable service principal for the azure compile masters
@@ -97,7 +97,7 @@ _Puppet Master Configuration Steps_
 
 
 
-_Whats in this git repo ?_
+### _Whats in this git repo ?_
 
 
 This set of templates and code helps you understand how Puppet Compile masters can be deployed in Azure in a stateless fashion allowing them to be managed as cattle, rather than pets. 
@@ -112,7 +112,7 @@ This uses the following Puppet and Azure capabilities
  * [Azure Resource Group Templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authoring-templates)
  * [The Azure Linux CLI v2](https://github.com/Azure/azure-cli)
 
-What should I know before getting this all working in my environment ?
+### What should I know before getting this all working in my environment ?
 
 There is quite a bit of moving parts in this topology, however it is relatively simple when you take it for a spin as long as you know the core components;
 
@@ -153,7 +153,7 @@ You will also need to ensure that DNS is functioning accordingly in your deploym
 
 
 
-_The Result_
+### _The Result_
 
 The below screenshots show what we will see in the Puppet console when deploying 2, then 4 compile masters in this manner.
 
@@ -179,6 +179,5 @@ The below screenshots show what we will see in the Puppet console when deploying
 
 
 
-_Use cases_
+### _Use cases_
 Now that we know that we can do this, what does this enable us to do ?
-
