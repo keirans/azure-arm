@@ -1,42 +1,36 @@
-# Automated Puppet Compile Masters in Azure
+# Automated Puppet Compile Masters in Microsoft Azure
 
-This is still in progress and will be covered in my Puppetconf 2017 talk in detail. Stay tuned for more updates.
+---
 
-This set of templates and code helps you understand how Puppet Compile masters can be deployed in Azure in a stateless fashion allowing them to be managed as cattle, rather than pets which is often the case.
+* *Please be ware that this is still in progress and will be covered in my Puppetconf 2017 talk in detail.* 
 
-This approach includes full support for compilemasters that use additional Puppetserver capabilities and gems such as hiera-eyaml.
+---
 
-This uses the following Puppet and Azure capabilities
+What is all this ?
 
- * Puppet Enterprise 2017.x configured as an all in one master of master
- * Azure Virtual Networking
- * Azure Virtual Machines + Custom Script Extensions
- * Azure Key Vault
- * Azure Resource Group Templates
- * The Azure Linux CLI v2
+To quote the [Puppet documentation about scaling Puppet Enterprise by adding Compile masters](https://docs.puppet.com/pe/latest/install_multimaster.html);
 
-What should I know before getting this all working in my environment
-
-* Linux (RHEL in this case) and Shell Scripting
-* Puppet Enterprise
-* Azure - Specifically with ARM Templates, VMs, Automation, Service Principals and Key Vault. There is quite a bit of moving parts in this topology, however it is relatively simple when you take it for a spin.
+| _As your infrastructure scales up to 4000 nodes and beyond, add load-balanced compile masters to your monolithic installation to increase the number of agents you can manage. Each compile master increases capacity by 1500 to 3000 nodes, until you exhaust the capacity of PuppetDB or the console, which run on the master of masters (MoM)._  |
+| ------------- | 
 
 
-How does this all work ?
+This is great and works quite well, however there are some challenges with building and managing compile masters that we need to overcome to ensure that we can manage them more efficiently (less like Pets), they are:
 
-Puppet Master Configuration Steps
-1. Pregenerate all the compile masters keys and certs
-2. Ensure you have a eyaml key created
-3. Create a suitable service principal for the azure compile masters
-4. Create a keyvault for all these secrets and other date
-5. Populate the keyvault with all the secrets that we need in a predictable naming format
-6. Ensure that the service principal for the compilemasters has suitable access to the keyvault containing our secrets and no other azure resources
-7. Place the service principal credentials into another Azure Keyvault so we can pass them into ARM template deployments as parameters securely.
-8. Ensure that node classification rules are in place for the trusted.certname of =~ compilemaster
-9. Ensure that it also includes another module that handles pupeptserver gem installation for eyaml (Link coming soon).
+* Compile masters need a special type of node-specific certificate to allow them to accept connections from agents in the fleet and authorise themselves as a trusted actor within the Puppet deployment, however for security reasons, You cannot currently use policy based autosigning like you would a normal node to authorise these types of nodes and certificate types. (See [SERVER-1005](https://tickets.puppetlabs.com/browse/SERVER-1005) for more information.)
 
 
-Compile Master Deployment process
+* Compile masters often require additional secrets to be transferred to the node to allow it to decrypt secrets that are stored in hiera when additional features such as hiera-eyaml is used. Due to the sensitive nature of these private keys (They allow decryption of your data), they are often manually transferred to the compile master at build time from a secrets repository.
+
+
+* Puppet Enterprise Patching and OS upgrades of compile masters can often be arduous, we want to get to a position in which these nodes can be easily disposed of, and then redeployed in an updated state.
+
+
+So, in summary ..
+
+_We want to make our compile masters be as disposable as possible, reducing the overhead of their management, while improving reliability, scalability and security_
+
+
+So how are we going to do this ?
 
 1. An Azure ARM template deploys a set of compile master virtual machines that fetch and execute a compilemasterbootstrap.sh script.
 
@@ -64,6 +58,72 @@ Compile Master Deployment process
 
 
 
+
+Whats in this git repo ?
+
+
+This set of templates and code helps you understand how Puppet Compile masters can be deployed in Azure in a stateless fashion allowing them to be managed as cattle, rather than pets. 
+
+This approach includes full support for compilemasters that use additional Puppetserver capabilities and gems such as hiera-eyaml.
+
+This uses the following Puppet and Azure capabilities
+
+ * [Puppet Enterprise 2017.x configured as an all in one master of masters](https://www.puppet.com)
+ * [Azure Virtual Networking / Azure Virtual Machines &  Custom Script extensions](https://azure.microsoft.com/en-au/services/virtual-machines/)
+ * [Azure Key Vault](https://azure.microsoft.com/en-au/services/key-vault/)
+ * [Azure Resource Group Templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authoring-templates)
+ * [The Azure Linux CLI v2](https://github.com/Azure/azure-cli)
+
+What should I know before getting this all working in my environment ?
+
+There is quite a bit of moving parts in this topology, however it is relatively simple when you take it for a spin as long as you know the core components;
+
+* Puppet Enterprise 2017.x
+* Linux and Shell Scripting
+* Azure - Specifically with ;
+    * ARM Templates
+    * Azure Virtual Networking & Virtual Machines
+    * Azure Automation capabilities
+    * Azure Service Principals
+    * Azure Key Vault
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+_Puppet Master Configuration Steps_
+1. Pregenerate all the compile masters keys and certs
+2. Ensure you have a eyaml key created
+3. Create a suitable service principal for the azure compile masters
+
+    You can understand this in more detail via the following link :  [Create an Azure Active Directory application and service principal that can access resources.](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal) 
+
+
+4. Create a keyvault for all these secrets and other date
+5. Populate the keyvault with all the secrets that we need in a predictable naming format
+6. Ensure that the service principal for the compilemasters has suitable access to the keyvault containing our secrets and no other azure resources
+7. Place the service principal credentials into another Azure Keyvault so we can pass them into ARM template deployments as parameters securely.
+8. Ensure that node classification rules are in place for the trusted.certname of =~ compilemaster
+9. Ensure that it also includes another module that handles pupeptserver gem installation for eyaml (Link coming soon).
+
+
+Compile Master Deployment process
+
+
+
+
+
 The Result
 
 * Before the deployment - A single Master of Masters - Puppetmaster.example.com
@@ -81,8 +141,3 @@ The Result
 
 ![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Compile_Masters_Online.png)
 
-
-* Adding Compilemaster capacity is as simple as incrementing the number of compilemaster copies we want in the ARM template and deploying the template. The automation handles the rest. In this example we just doubled our compilemasters in just a few minutes.
-
-
-![Additional Capacity](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Additional_compilemaster_capacity.png)
