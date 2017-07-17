@@ -51,10 +51,9 @@ So how are we going to do this ?
 5. Once the secrets have been downloaded and placed on the instance in the required locations, the instance logs out of the Azure API as there is no need for it to have access any longer.
 
 
-6. The node installs Puppet via the install.bash script fetched directly from the Master of Masters.
+6. The node installs Puppet via the install.bash script fetched directly from the Master of Masters. Because we have already provided a pre-signed cert for this host, it is automatically authorised and classified by the Puppet Master of Masters.
 
-
-7. The script then waits for up to 10 minutes for the initial Puppet run to complete, then Runs Puppet 2 more times for good measure to ensure that all is green in the console.
+7. The script then waits for up to 10 minutes for the initial Puppet runs to complete (We run a few extras) to ensure that is green in the console. They are then available for service.
 
 
 
