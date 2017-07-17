@@ -19,12 +19,12 @@ To quote the [Puppet documentation about scaling Puppet Enterprise by adding Com
 | ------------- | 
 
 
-An example deployment would look something like this;
+An example deployment would look something like..;
 
 ![Example Architecture](https://github.com/keirans/azure-arm/blob/master/docs/img/Example_Architecture.png?raw=true)
 
 
-This is great and works  well, however there are some challenges with building and managing compile masters that we would like to overcome to ensure that we can manage them more efficiently (less like pets), they are:
+This topology works well, however there are some challenges with building and managing compile masters that we would like to overcome to ensure that we can manage them more efficiently (less like pets), they are:
 
 * Compile masters need a special type of node-specific certificate to allow them to accept connections from agents in the fleet and authorise themselves as a trusted actor within the Puppet deployment, however for security reasons, You cannot currently use policy based autosigning like you would a normal node to authorise these types of nodes and certificate types, this provides a bit of a barrier when it comes to automating them effectively. (See [SERVER-1005](https://tickets.puppetlabs.com/browse/SERVER-1005) for more information.)
 
@@ -46,15 +46,18 @@ _So how are we going to do this ?_
 
 The approach is as follows:
 
-1. An Azure ARM template deploys a set of compile master virtual machines that fetch and execute a compilemasterbootstrap.sh script.
+1. An Azure ARM template deploys a set of compile master virtual machines. Nested templates are used to create multiple copies of a single compile master template.
 
 
-2. The bootstrap script takes a set of Azure API credentials as parameters. These credentials are fetched from Azure Keyvault on deploy to ensure that they are stored securely.
+2. On launch, each instance fetches and executes a compilemasterbootstrap.sh script.
 
 
-3. When the script executes on the instance, it installs a set of required software components on the host including python and the Azure CLI.
+3. The bootstrap script takes a set of Azure API credentials as parameters. These credentials are fetched from Azure Keyvault on deploy to ensure that they are stored and used securely.
 
-4. The Azure CLI then uses the credentials passed into the script to login to the Azure CLI and retreive the following precreated secrets that it requires.
+
+4. When the script executes on the instance, it installs a set of required software components on the host including python and the Azure CLI.
+
+5. The Azure CLI then uses the credentials passed into the script to login to the Azure CLI and retreive the following precreated secrets that it requires from the Puppet secrets keyvault.
 
     * The Compile Masters pre-created private key
     * The Compile Masters pre-created public key
@@ -62,12 +65,11 @@ The approach is as follows:
     * The Puppet deployments CA public cert
     * The sites eyaml private key (For allowing it to decrypt hiera secrets)
 
-5. Once the secrets have been downloaded and placed on the instance in the required locations, the instance logs out of the Azure API as there is no need for it to have access any longer.
+6. Once the secrets have been downloaded and placed on the instance in the required locations, the instance logs out of the Azure API as there is no need for it to have access any longer.
 
+7. The node installs Puppet via the install.bash script fetched directly from the Master of Masters. Because we have already provided a pre-signed cert for this host, it is automatically authorised and classified by the Puppet Master of Masters.
 
-6. The node installs Puppet via the install.bash script fetched directly from the Master of Masters. Because we have already provided a pre-signed cert for this host, it is automatically authorised and classified by the Puppet Master of Masters.
-
-7. The script then waits for up to 10 minutes for the initial Puppet runs to complete (We run a few extras) to ensure that is green in the console. They are then available for service.
+8. The script then waits for up to 10 minutes for the initial Puppet runs to complete (We run a few extras) to ensure that is green in the console. They are then available for service.
 
 
 
@@ -154,3 +156,6 @@ The Result
 
 ![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Compile_Masters_Online.png)
 
+* Additional capacity is only a redeploy away after incrementing the compile master count parameter in an ARM template.
+
+![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Additional_compilemaster_capacity.png)
