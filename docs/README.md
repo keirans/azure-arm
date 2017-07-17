@@ -42,7 +42,7 @@ _We want to make our compile masters be as disposable as possible, reducing the 
 
 _So how are we going to do this ?_
 
-
+![Puppet Azure Architecture](https://github.com/keirans/azure-arm/blob/master/docs/img/azure_compilemaster_components.png?raw=true)
 
 The approach is as follows:
 
@@ -153,3 +153,4 @@ The Result
 
 
 ![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Compile_Masters_Online.png)
+
