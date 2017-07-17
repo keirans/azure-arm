@@ -18,19 +18,21 @@ To quote the [Puppet documentation about scaling Puppet Enterprise by adding Com
 | _As your infrastructure scales up to 4000 nodes and beyond, add load-balanced compile masters to your monolithic installation to increase the number of agents you can manage. Each compile master increases capacity by 1500 to 3000 nodes, until you exhaust the capacity of PuppetDB or the console, which run on the master of masters (MoM)._  |
 | ------------- | 
 
+
+An example deployment would look something like this;
+
 ![Example Architecture](https://github.com/keirans/azure-arm/blob/master/docs/img/Example_Architecture.png?raw=true)
 
-_Example Architecture_
 
-This is great and works  well, however there are some challenges with building and managing compile masters that we would like to overcome to ensure that we can manage them more efficiently (less like Pets), they are:
+This is great and works  well, however there are some challenges with building and managing compile masters that we would like to overcome to ensure that we can manage them more efficiently (less like pets), they are:
 
-* Compile masters need a special type of node-specific certificate to allow them to accept connections from agents in the fleet and authorise themselves as a trusted actor within the Puppet deployment, however for security reasons, You cannot currently use policy based autosigning like you would a normal node to authorise these types of nodes and certificate types. (See [SERVER-1005](https://tickets.puppetlabs.com/browse/SERVER-1005) for more information.)
-
-
-* Compile masters often require additional secrets to be transferred to the node to allow it to decrypt secrets that are stored in hiera when additional features such as hiera-eyaml is used. Due to the sensitive nature of these private keys (They allow decryption of your data), they are often manually transferred to the compile master at build time from a secrets repository.
+* Compile masters need a special type of node-specific certificate to allow them to accept connections from agents in the fleet and authorise themselves as a trusted actor within the Puppet deployment, however for security reasons, You cannot currently use policy based autosigning like you would a normal node to authorise these types of nodes and certificate types, this provides a bit of a barrier when it comes to automating them effectively. (See [SERVER-1005](https://tickets.puppetlabs.com/browse/SERVER-1005) for more information.)
 
 
-* Puppet Enterprise Patching and OS upgrades of compile masters can often be arduous, we want to get to a position in which these nodes can be easily disposed of, and then redeployed in an updated state.
+* Compile masters often require additional secrets to be transferred to the node to allow it to decrypt values that are stored in hiera when additional features such as hiera-eyaml is used. Due to the sensitive nature of these private keys (They allow decryption of your sensitive hiera data), they are often manually transferred to the compile master at build time from a secrets repository.
+
+
+* Puppet Enterprise Patching and OS upgrades of compile masters can often be arduous, we want to get to a position in which these nodes can be easily disposed of, and then redeployed in an updated state. No more SSH + YUM + Puppet upgrade scripts.
 
 
 _So, TL;DR ?_
@@ -39,6 +41,8 @@ _We want to make our compile masters be as disposable as possible, reducing the 
 
 
 _So how are we going to do this ?_
+
+
 
 The approach is as follows:
 
@@ -149,4 +153,3 @@ The Result
 
 
 ![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Compile_Masters_Online.png)
-
