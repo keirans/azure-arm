@@ -46,10 +46,11 @@ _So how are we going to do this ?_
 
 The approach is as follows:
 
-1. An Azure ARM template deploys a set of compile master virtual machines. Nested templates are used to create multiple copies of a single compile master template.
+1. An Azure ARM template deploys a set of compile master virtual machines. Nested templates are used to create multiple copies of a single compile master template. 
+Each compile master instance is named compilemasterX, where X is a unique instance ID passed down from the nested template.
 
 
-2. On launch, each instance fetches and executes a compilemasterbootstrap.sh script.
+2. On launch, each instance fetches and executes a compilemasterbootstrap.sh script from a git repostory over HTTPS.
 
 
 3. The bootstrap script takes a set of Azure API credentials as parameters. These credentials are fetched from Azure Keyvault on deploy to ensure that they are stored and used securely.
@@ -65,11 +66,33 @@ The approach is as follows:
     * The Puppet deployments CA public cert
     * The sites eyaml private key (For allowing it to decrypt hiera secrets)
 
+As each compile master instance is named compilemasterX, where X is a unique instance ID passed down from the nested template, they are able to identify and retreive their appropriate keys and certs accordingly.
+
 6. Once the secrets have been downloaded and placed on the instance in the required locations, the instance logs out of the Azure API as there is no need for it to have access any longer.
 
-7. The node installs Puppet via the install.bash script fetched directly from the Master of Masters. Because we have already provided a pre-signed cert for this host, it is automatically authorised and classified by the Puppet Master of Masters.
+7. The node installs Puppet via the install.bash script fetched directly from the Master of Masters. Because we have already provided a pre-signed cert for this host, it is automatically authorised and classified by the Puppet Master of Masters as a Puppet Master by assigning it to the Puppet Master node group.
 
 8. The script then waits for up to 10 minutes for the initial Puppet runs to complete (We run a few extras) to ensure that is green in the console. They are then available for service.
+
+
+
+
+_Puppet Master Configuration Steps_
+1. Pregenerate all the compile masters keys and certs
+2. Ensure you have a eyaml key created
+3. Create a suitable service principal for the azure compile masters
+
+    You can understand this in more detail via the following link :  [Create an Azure Active Directory application and service principal that can access resources.](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal) 
+
+
+4. Create a keyvault for all these secrets and other date
+5. Populate the keyvault with all the secrets that we need in a predictable naming format
+6. Ensure that the service principal for the compilemasters has suitable access to the keyvault containing our secrets and no other azure resources
+7. Place the service principal credentials into another Azure Keyvault so we can pass them into ARM template deployments as parameters securely.
+8. Ensure that node classification rules are in place for the trusted.certname of =~ compilemaster
+9. Ensure that it also includes another module that handles pupeptserver gem installation for eyaml (Link coming soon).
+
+
 
 
 
@@ -104,6 +127,11 @@ There is quite a bit of moving parts in this topology, however it is relatively 
 
 
 
+You will also need to ensure that DNS is functioning accordingly in your deployments, and thus its out of scope in these examples. These examples assume the following.
+
+* Domain: *.example.com
+* Master of Masters: Puppetmaster.example.com
+* Compilemasters: compilemaster0-40.example.com
 
 
 
@@ -117,45 +145,40 @@ There is quite a bit of moving parts in this topology, however it is relatively 
 
 
 
-_Puppet Master Configuration Steps_
-1. Pregenerate all the compile masters keys and certs
-2. Ensure you have a eyaml key created
-3. Create a suitable service principal for the azure compile masters
-
-    You can understand this in more detail via the following link :  [Create an Azure Active Directory application and service principal that can access resources.](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal) 
-
-
-4. Create a keyvault for all these secrets and other date
-5. Populate the keyvault with all the secrets that we need in a predictable naming format
-6. Ensure that the service principal for the compilemasters has suitable access to the keyvault containing our secrets and no other azure resources
-7. Place the service principal credentials into another Azure Keyvault so we can pass them into ARM template deployments as parameters securely.
-8. Ensure that node classification rules are in place for the trusted.certname of =~ compilemaster
-9. Ensure that it also includes another module that handles pupeptserver gem installation for eyaml (Link coming soon).
-
-
-Compile Master Deployment process
 
 
 
 
 
-The Result
 
-* Before the deployment - A single Master of Masters - Puppetmaster.example.com
+
+
+_The Result_
+
+The below screenshots show what we will see in the Puppet console when deploying 2, then 4 compile masters in this manner.
+
+* Before the deployment begins - A single Master of Masters - Puppetmaster.example.com
 
 ![Single Puppetmaster](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Single_Master.png)
 
 
 
-* After the Deployment we have 2 new Puppetmasters that have run and reported change. They arent showing up via the service API however.
+* After the initial deployment we have 2 new Puppetmasters that have run and reported change. They arent showing up via the service API just yet however.
 
 ![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Compile_Masters_Bootstrap.png)
 
-* The Puppetmaster checks in and configures the environment with the new ready compilemasters. The Status API reports they are all online and functioning.
+* The Puppet Master of Masters then checks in and configures the environment with the new ready compilemasters. The Status API reports they are all online and functioning now.
 
 
 ![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Compile_Masters_Online.png)
 
 * Additional capacity is only a redeploy away after incrementing the compile master count parameter in an ARM template.
 
+
 ![Bootstrapping Puppetmasters](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Additional_compilemaster_capacity.png)
+
+
+
+_Use cases_
+Now that we know that we can do this, what does this enable us to do ?
+
