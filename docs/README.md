@@ -8,13 +8,21 @@
 
 What is all this ?
 
+This document and associated code examples demonstrates how Puppet Enterprise, when deployed in Microsoft Azure, can benefit from a number of different services and capabilities, enabling more effective deployment and ongoing management, specifically in the compile master space.
+
+Compile Masters ? 
+
+
 To quote the [Puppet documentation about scaling Puppet Enterprise by adding Compile masters](https://docs.puppet.com/pe/latest/install_multimaster.html);
 
 | _As your infrastructure scales up to 4000 nodes and beyond, add load-balanced compile masters to your monolithic installation to increase the number of agents you can manage. Each compile master increases capacity by 1500 to 3000 nodes, until you exhaust the capacity of PuppetDB or the console, which run on the master of masters (MoM)._  |
 | ------------- | 
 
+![Example Architecture](https://github.com/keirans/azure-arm/blob/master/docs/img/Example_Architecture.png?raw=true)
 
-This is great and works quite well, however there are some challenges with building and managing compile masters that we need to overcome to ensure that we can manage them more efficiently (less like Pets), they are:
+_Example Architecture_
+
+This is great and works  well, however there are some challenges with building and managing compile masters that we would like to overcome to ensure that we can manage them more efficiently (less like Pets), they are:
 
 * Compile masters need a special type of node-specific certificate to allow them to accept connections from agents in the fleet and authorise themselves as a trusted actor within the Puppet deployment, however for security reasons, You cannot currently use policy based autosigning like you would a normal node to authorise these types of nodes and certificate types. (See [SERVER-1005](https://tickets.puppetlabs.com/browse/SERVER-1005) for more information.)
 
@@ -25,12 +33,14 @@ This is great and works quite well, however there are some challenges with build
 * Puppet Enterprise Patching and OS upgrades of compile masters can often be arduous, we want to get to a position in which these nodes can be easily disposed of, and then redeployed in an updated state.
 
 
-So, in summary ..
+_So, TL;DR ?_
 
 _We want to make our compile masters be as disposable as possible, reducing the overhead of their management, while improving reliability, scalability and security_
 
 
-So how are we going to do this ?
+_So how are we going to do this ?_
+
+The approach is as follows:
 
 1. An Azure ARM template deploys a set of compile master virtual machines that fetch and execute a compilemasterbootstrap.sh script.
 
@@ -58,7 +68,7 @@ So how are we going to do this ?
 
 
 
-Whats in this git repo ?
+_Whats in this git repo ?_
 
 
 This set of templates and code helps you understand how Puppet Compile masters can be deployed in Azure in a stateless fashion allowing them to be managed as cattle, rather than pets. 
