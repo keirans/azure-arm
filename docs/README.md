@@ -78,18 +78,43 @@ As each compile master instance is named compilemasterX, where X is a unique ins
 
 
 ### _Puppet Master Configuration Steps_
+
 1. Pregenerate all the compile masters keys and certs
+
+      What you may not be aware of is that you can pre-create all these certs for the compile masters on the master of masters (or the host that is your CA) and then transfer them to the instance rather than do it from the Puppet agent directly. In doing this, you can use the --dns_alt_names option as required.
+  
+      As an example, you can have a look at the script "generate_certs.sh" in this repository that shows how we can create a keyvault in Azure, generate 40 compile master keys and certs and then store them in the keyvault so they can be retreived by a compile master when they are bootstrapped.
+  
+      Don't forget that the service principal credentials that are passed into the bootstrap script needs to have access to this key vault resource in order to be able to access these keys and certs.
+
+
+
 2. Ensure you have a eyaml key created
+
+    If you are using hiera-eyaml, make sure you also upload the private key to the file vault as well.
+
+
+
 3. Create a suitable service principal for the azure compile masters
 
     You can understand this in more detail via the following link :  [Create an Azure Active Directory application and service principal that can access resources.](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal) 
 
 
 4. Create a keyvault for all these secrets and other date
+
+
 5. Populate the keyvault with all the secrets that we need in a predictable naming format
+
+
 6. Ensure that the service principal for the compilemasters has suitable access to the keyvault containing our secrets and no other azure resources
+
+
 7. Place the service principal credentials into another Azure Keyvault so we can pass them into ARM template deployments as parameters securely.
+
+
 8. Ensure that node classification rules are in place for the trusted.certname of =~ compilemaster
+
+
 9. Ensure that it also includes another module that handles pupeptserver gem installation for eyaml (Link coming soon).
 
 
@@ -181,3 +206,4 @@ The below screenshots show what we will see in the Puppet console when deploying
 
 ### _Use cases_
 Now that we know that we can do this, what does this enable us to do ?
+
