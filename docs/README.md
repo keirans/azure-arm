@@ -10,6 +10,16 @@
 
 This document and associated code examples demonstrates how Puppet Enterprise, when deployed in Microsoft Azure, can benefit from a number of different services and capabilities, enabling more effective deployment and ongoing management, specifically in the compile master space.
 
+This uses the following Puppet and Azure capabilities;
+
+ * [Puppet Enterprise 2017.x configured as an all in one master of masters](https://www.puppet.com)
+ * [Azure Virtual Networking / Azure Virtual Machines &  Custom Script extensions](https://azure.microsoft.com/en-au/services/virtual-machines/)
+ * [Azure Key Vault](https://azure.microsoft.com/en-au/services/key-vault/)
+ * [Azure Resource Group Templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authoring-templates)
+ * [The Azure Linux CLI v2](https://github.com/Azure/azure-cli)
+
+
+
 ### Compile Masters ? 
 
 
