@@ -1,12 +1,8 @@
 #!/bin/bash
-#set -x
-# This script does the following actions
-# Creates a resource group
-# Creates a keyvault
-# Generates a set of CompileMaster Certs with altdns names
-#
-#
-#
+# This script purges the compile master nodes from the Puppet environment
+# between 0 and COUNT. Handy for removing compile masters from your environment
+# when testing.
+# Use with caution.
 
 export RGNAME='keyvaultsg'
 export VAULTNAME='puppetvault'

@@ -136,7 +136,31 @@ You will also need to ensure that DNS is functioning accordingly in your deploym
 * Compilemasters: compilemaster0-40.example.com
 
 
-Code components
+_Repository components_ 
+
+* Base
+
+  - A sample ARM template that builds a set of subnets in a VNET and the example parameters for the network.
+  
+
+* Servers
+
+    - A sample set of ARM templates that show how a set of compile masters can be deployed and bootstrapped from a central master of masters as detailed in this document. 
+
+    - A single instance template that was used for the initial build of the master of masters.
+
+
+* Docs
+    * This document 
+
+
+* manifests
+    * A set of manifests that are useful for seeing how we can configure the compile masters to be fully functional in an automated fashion. In this case, a class that installs the hiera-eyaml gem into the puppet server on a compile master.
+
+
+* scripts
+    * A set of scripts that demonstrate how to setup the compile master certs and store them in an Azure keyvault, as well as a sample bootstrap script that shows how we can retreive them and bootstrap compile masters that gives us a fully functional, automated compile master without human interaction.
+
 
 
 
