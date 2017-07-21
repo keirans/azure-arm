@@ -91,7 +91,7 @@ As each compile master instance is named compilemasterX, where X is a unique ins
 
 1. Pregenerate all the compile masters keys and certs and store them in a keyvault for retreival.
 
-      What you may not be aware of is that you can pre-create all these certs for the compile masters on the master of masters (or the host that is your CA) and then transfer them to the instance rather than do it from the Puppet agent directly. In doing this, you can use the --dns_alt_names option as required.
+      What you may not be aware of is that you can pre-create all the certs for the compile masters on the master of masters (or the host that is your CA) and then transfer them to the instance rather than do it from the Puppet agent directly. In doing this, you can use the --dns_alt_names option as required.
   
       As an example, you can have a look at the script "generate_certs.sh" in this repository that shows how we can create a keyvault in Azure, generate 40 compile master keys and certs and then store them in the keyvault so they can be retreived by a compile master when they are bootstrapped.
   
@@ -100,27 +100,24 @@ As each compile master instance is named compilemasterX, where X is a unique ins
 
 2. Ensure you have a eyaml key created and place that in the Puppet secrets keyvault
 
-    If you are using hiera-eyaml, make sure you also upload the private key to the file vault as well. Each compile master needs to have this present to be able to disable encrypted hiera secrets.
+    If you are using hiera-eyaml, make sure you also upload the private key (or keys) to the file vault as well. Each compile master needs to have this present to be able to disable encrypted hiera secrets.
     
     If you look at the "generate_certs.sh" file, you will see that it also checks for the presence of this file and uploads it into the key vault with the name "eyamlprivate"
 
 
 3. Create a suitable service principal for the azure compile masters
 
+    Because Azure doesnt have the concept (yet) if AWS IAM instance roles, we need to create a service principal for the compile masters that has access to the Keyvault that contains all the compile master secrets.
+
     You can understand this in more detail via the following link :  [Create an Azure Active Directory application and service principal that can access resources.](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal) 
 
+Once you have created the service principal, you should place these credentials into another, seperate key vault that is used to pass secrets into the compile master deployments. (Platform Keyvaul in the above diagrams)
 
 
-4. Place the service principal credentials into another Azure Keyvault so we can pass them into ARM template deployments as parameters securely.
+4. Ensure that node classification rules are in place for the compile masters
+To ensure that the when a compile master requests a catalogue from the master of masters, it is classified correctly, you need to add a node classifier rule that places instances with a trusted.certname that begins with compilemaster*.example.com into the Puppet Masters node group, esuring that the instances are configured correctly.
 
-
-5. Ensure that node classification rules are in place for the trusted.certname of =~ compilemaster
-
-
-6. Ensure that it also includes another module that handles pupeptserver gem installation for eyaml (Link coming soon).
-
-
-
+    To ensure that the compile masters install additional gems such as the eyaml gem into the Puppet server, you will need to add an additional class to the Puppet Master node group that configures them. A sample manifest for this is stored in this git repository for your reference.
 
 
 
@@ -131,28 +128,6 @@ This set of templates and code helps you understand how Puppet Compile masters c
 
 This approach includes full support for compilemasters that use additional Puppetserver capabilities and gems such as hiera-eyaml.
 
-This uses the following Puppet and Azure capabilities
-
- * [Puppet Enterprise 2017.x configured as an all in one master of masters](https://www.puppet.com)
- * [Azure Virtual Networking / Azure Virtual Machines &  Custom Script extensions](https://azure.microsoft.com/en-au/services/virtual-machines/)
- * [Azure Key Vault](https://azure.microsoft.com/en-au/services/key-vault/)
- * [Azure Resource Group Templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authoring-templates)
- * [The Azure Linux CLI v2](https://github.com/Azure/azure-cli)
-
-### What should I know before getting this all working in my environment ?
-
-There is quite a bit of moving parts in this topology, however it is relatively simple when you take it for a spin as long as you know the core components;
-
-* Puppet Enterprise 2017.x
-* Linux and Shell Scripting
-* Azure - Specifically with ;
-    * ARM Templates
-    * Azure Virtual Networking & Virtual Machines
-    * Azure Automation capabilities
-    * Azure Service Principals
-    * Azure Key Vault
-
-
 
 You will also need to ensure that DNS is functioning accordingly in your deployments, and thus its out of scope in these examples. These examples assume the following.
 
@@ -161,6 +136,7 @@ You will also need to ensure that DNS is functioning accordingly in your deploym
 * Compilemasters: compilemaster0-40.example.com
 
 
+Code components
 
 
 
