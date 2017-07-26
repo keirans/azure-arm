@@ -163,23 +163,6 @@ _Repository components_
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### _The Result_
 
 The below screenshots show what we will see in the Puppet console when deploying 2, then 4 compile masters in this manner.
@@ -187,7 +170,6 @@ The below screenshots show what we will see in the Puppet console when deploying
 * Before the deployment begins - A single Master of Masters - Puppetmaster.example.com
 
 ![Single Puppetmaster](https://raw.githubusercontent.com/keirans/azure-arm/master/docs/img/Single_Master.png)
-
 
 
 * After the initial deployment we have 2 new Puppetmasters that have run and reported change. They arent showing up via the service API just yet however.
@@ -208,4 +190,19 @@ The below screenshots show what we will see in the Puppet console when deploying
 
 ### _Use cases_
 Now that we know that we can do this, what does this enable us to do ?
+
+* Rapid deployment of compile masters in scale out scenarios
+
+  We can rapidly build compile masters when need arises, such as adding new compile masters, and they will be quickly be brought into service and configured identically.
+  
+  
+* Rapid OS patching of compile masters via teardown and redeployment
+
+    Rather than install OS patches in place, one by one, tear down all the compile masters and then redeploy them using an updated OS baseline. The instances will then all reinstall Puppet on build and be configured as required. A roll back will be as simple and tearing down the build and redeploying with the previous version.
+
+* Rapid Puppet patching of compile masters via teardown and redeployment
+
+    Rather than install Puppet patches in place,one by one, tear down all the deployed Puppet compile masters, patch the Puppet master of masters, then redploy all the compile masters. In doing this, the Puppet compile masters will be built using the latest Puppet software exposed by the master of masters, your new compile masters will have the same identities, but their software will be at the latest versions.
+    
+    
 
