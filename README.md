@@ -107,15 +107,16 @@ As each compile master instance is named compilemasterX, where X is a unique ins
 
 3. Create a suitable service principal for the azure compile masters
 
-    Because Azure doesnt have the concept (yet) if AWS IAM instance roles, we need to create a service principal for the compile masters that has access to the Keyvault that contains all the compile master secrets.
+    Because Azure doesnt have the concept (yet) of AWS IAM instance roles, we need to create a service principal for the compile masters that has access to the Keyvault that contains all the compile master secrets.
 
     You can understand this in more detail via the following link :  [Create an Azure Active Directory application and service principal that can access resources.](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal) 
 
-Once you have created the service principal, you should place these credentials into another, seperate key vault that is used to pass secrets into the compile master deployments. (Platform Keyvaul in the above diagrams)
+    Once you have created the service principal, you should place these credentials into another, seperate key vault that is used to pass secrets into the compile master deployments. (Platform Keyvaul in the above diagrams)
 
 
 4. Ensure that node classification rules are in place for the compile masters
-To ensure that the when a compile master requests a catalogue from the master of masters, it is classified correctly, you need to add a node classifier rule that places instances with a trusted.certname that begins with compilemaster*.example.com into the Puppet Masters node group, esuring that the instances are configured correctly.
+
+    To ensure that the when a compile master requests a catalogue from the master of masters, it is classified correctly, you need to add a node classifier rule that places instances with a trusted.certname that begins with compilemaster*.example.com into the Puppet Masters node group, esuring that the instances are configured correctly.
 
     To ensure that the compile masters install additional gems such as the eyaml gem into the Puppet server, you will need to add an additional class to the Puppet Master node group that configures them. A sample manifest for this is stored in this git repository for your reference.
 
